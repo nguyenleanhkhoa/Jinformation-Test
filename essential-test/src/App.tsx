@@ -2,28 +2,28 @@ import * as React from 'react';
 import './App.css';
 import { connect } from 'react-redux';
 import { Dispatch, Unsubscribe } from 'redux';
-import ReactHtmlParser from 'react-html-parser'; 
+import ReactHtmlParser from 'react-html-parser';
 
-import { 
+import {
   FetchingDataType,
   ReinitStateFetchingDataType,
-  
+
   fetchingData,
   reinitStateFetchingData
- } from './actions/FetchingDataActions'
+} from './actions/FetchingDataActions'
 import store from './store/Store';
-import { 
-  FetchingDataStateType, 
+import {
+  FetchingDataStateType,
   initialState,
- } from './reducers/FetchingDataReducer';
+} from './reducers/FetchingDataReducer';
 
 interface PropsFromDispatch {
-  fetchingData (): FetchingDataType,
-  reinitState() : ReinitStateFetchingDataType
+  fetchingData(): FetchingDataType,
+  reinitState(): ReinitStateFetchingDataType
 }
 
 interface State {
-  data : [],
+  data: [],
   displayData: []
   statusCode: number,
   searchingKey: string
@@ -31,12 +31,12 @@ interface State {
 
 class App extends React.Component<PropsFromDispatch, State> {
 
-  fetchingDataState : FetchingDataStateType = initialState;
+  fetchingDataState: FetchingDataStateType = initialState;
 
-  unsubscribe : Unsubscribe = store.subscribe(() => {
+  unsubscribe: Unsubscribe = store.subscribe(() => {
     this.fetchingDataState = store.getState().fetchingData;
 
-    if(this.fetchingDataState.statusCode === 200){
+    if (this.fetchingDataState.statusCode === 200) {
       this.setState({
         ...this.state,
         data: this.fetchingDataState.resultData,
@@ -50,7 +50,7 @@ class App extends React.Component<PropsFromDispatch, State> {
 
   });
 
-  constructor(props: PropsFromDispatch){
+  constructor(props: PropsFromDispatch) {
     super(props);
     this.dataItem = this.dataItem.bind(this);
     this.searching = this.searching.bind(this);
@@ -62,8 +62,8 @@ class App extends React.Component<PropsFromDispatch, State> {
     }
   }
 
-  shouldComponentUpdate(nextProps: PropsFromDispatch, nextState: State){
-    if(nextState.statusCode === 200){
+  shouldComponentUpdate(nextProps: PropsFromDispatch, nextState: State) {
+    if (nextState.statusCode === 200) {
       this.setState({
         ...nextState,
         statusCode: initialState.statusCode
@@ -72,8 +72,8 @@ class App extends React.Component<PropsFromDispatch, State> {
       return true
     }
 
-    if(nextState.searchingKey !== this.state.searchingKey){
-      if(nextState.searchingKey === ""){
+    if (nextState.searchingKey !== this.state.searchingKey) {
+      if (nextState.searchingKey === "") {
         this.setState({
           ...this.state,
           searchingKey: "",
@@ -83,52 +83,54 @@ class App extends React.Component<PropsFromDispatch, State> {
       return true;
     }
 
-    if(nextState.displayData !== this.state.displayData){
+    if (nextState.displayData !== this.state.displayData) {
       return true;
     }
-    
+
     return false;
   }
-  
-  componentDidMount(){
+
+  componentDidMount() {
     // state fetching data from API
     this.props.fetchingData();
   }
 
-  dataItem = ( item: any ) => {
+  dataItem = (item: any) => {
     return (
-      <section className="data-item"  key={item.author_id}>-----------------------------------------------------------------
-        <section>
-          <span> Title: </span><h2>{ item.title }</h2>
-          <span> Author: </span><h4>{ item.author }</h4>
-          {
-            item.tags === "" ? null : <section><span> Tags: </span><p>{ item.tags }</p></section>
-          }
-          <span> Link to hi-resolution image: </span><a href={item.link} target="_blank">{ item.link }</a>
-        </section>
-        
-        <section>
-        <span>Description: </span>
-        {
-          ReactHtmlParser (item.description)
-        }
-        </section>
+      <section className="data-item border-top-dashed mt-2 shadow-box" key={item.author_id}>
+        <div className="padding-10 row">
+          <section className="col-md-4">
+            <span>Description: </span>
+            {
+              ReactHtmlParser(item.description)
+            }
+          </section>
+          <section className="col-md-8">
+            <span> Title: </span><h2>{item.title}</h2>
+            <span> Author: </span><h4>{item.author}</h4>
+            {
+              item.tags === "" ? null : <section><span> Tags: </span><p>{item.tags}</p></section>
+            }
+            <span> Link to hi-resolution image: </span><a href={item.link} target="_blank">{item.link}</a>
+          </section>
+        </div>
+
       </section>
     )
-  } 
+  }
 
-  searching = (e : React.ChangeEvent<HTMLInputElement>) => {
+  searching = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       ...this.state,
       searchingKey: e.target.value
     })
   }
 
-  findMatchItem = (item: any , searchingKey: string) : boolean => {
+  findMatchItem = (item: any, searchingKey: string): boolean => {
     const key = searchingKey.toLowerCase()
-    if(item.title.toLowerCase().includes(key.toLowerCase())){
+    if (item.title.toLowerCase().includes(key.toLowerCase())) {
       return true;
-    } 
+    }
     else if (item.author.toLowerCase().includes(key.toLowerCase())) {
       return true;
     }
@@ -148,20 +150,23 @@ class App extends React.Component<PropsFromDispatch, State> {
     const { data, searchingKey } = this.state;
     let i = 0;
     return (
-      <div className="App">
-        <input type="text" value={searchingKey} onChange={this.searching}/>
+      <div className="App container">
+      <div className="display-flex-reverse ">
+        <input type="text" value={searchingKey} onChange={this.searching} placeholder="search...." />
+
+      </div>
         {
-          data.length > 0 
-          ?
-          data.map((item)=>{
-            if(this.findMatchItem(item, searchingKey)){
-              console.log(i++);
-              return this.dataItem(item);
-            }
-            return null;
-          })
-          :
-          <p>Data not found</p>
+          data.length > 0
+            ?
+            data.map((item) => {
+              if (this.findMatchItem(item, searchingKey)) {
+                console.log(i++);
+                return this.dataItem(item);
+              }
+              return null;
+            })
+            :
+            <p>Data not found</p>
         }
       </div>
     );
